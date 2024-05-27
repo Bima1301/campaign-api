@@ -1,12 +1,15 @@
 package user
 
 import (
+	"errors"
+
 	"github.com/oklog/ulid/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
 	RegisterUser(input RegisterUserInput) (User, error)
+	Login(input LoginInput) (User, error)
 }
 
 type service struct {
@@ -36,5 +39,24 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 		return newUser, err
 	}
 	return newUser, nil
+}
 
+func (s *service) Login(input LoginInput) (User, error) {
+	email := input.Email
+	password := input.Password
+
+	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return user, err
+	}
+	if user.ID == "" {
+		return user, errors.New("user not found on that email")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return user, errors.New("password not match")
+	}
+
+	return user, nil
 }
