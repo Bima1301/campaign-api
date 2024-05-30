@@ -2,9 +2,11 @@ package main
 
 import (
 	"campaign-api/auth"
+	"campaign-api/campaign"
 	"campaign-api/handler"
 	"campaign-api/helper"
 	"campaign-api/user"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -24,6 +26,15 @@ func main() {
 	}
 
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
+
+	campigns, err := campaignRepository.FindAll()
+
+	fmt.Println(len(campigns))
+	for _, c := range campigns {
+		fmt.Println(c.Name)
+	}
+
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 
