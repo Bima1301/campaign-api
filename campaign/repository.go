@@ -6,6 +6,7 @@ import (
 
 type Repository interface {
 	FindAll() ([]Campaign, error)
+	FindByID(ID string) (Campaign, error)
 	FindByUserID(userID string) ([]Campaign, error)
 }
 
@@ -37,5 +38,14 @@ func (r *repository) FindByUserID(userID string) ([]Campaign, error) {
 	}
 
 	return campaigns, nil
+}
+func (r *repository) FindByID(ID string) (Campaign, error) {
+	var campaign Campaign
+	err := r.db.Where("id = ?", ID).Preload("User").Preload("CampaignImages").Find(&campaign).Error
 
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
 }
